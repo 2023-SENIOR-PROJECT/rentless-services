@@ -93,3 +93,12 @@ func GetAllProduct() (*mongo.Cursor, error) {
 	}
 	return cursor, nil
 }
+
+func GetOneProduct(filter interface{}) *mongo.SingleResult {
+	var singleResult *mongo.SingleResult
+	if db != nil {
+		collection := db.Collection("product")
+		singleResult = collection.FindOne(context.Background(), filter)
+	}
+	return singleResult
+}
