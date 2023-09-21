@@ -1,4 +1,4 @@
-package main
+package mongo
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-var db *mongo.Database
+var DB *mongo.Database
 
 func init() {
 
@@ -41,16 +41,16 @@ func ConnectMongoDB() {
 		}
 	}
 
-	db = client.Database("rentless")
-	fmt.Println(db.Name())
+	DB = client.Database("rentless")
+	fmt.Println(DB.Name())
 	fmt.Println("Connected")
 }
 
 func InsertOne(data interface{}) *mongo.InsertOneResult {
 	var insertResult *mongo.InsertOneResult
 	var err error
-	if db != nil {
-		collection := db.Collection("product")
+	if DB != nil {
+		collection := DB.Collection("product")
 		if insertResult, err = collection.InsertOne(context.Background(), data); err != nil {
 			log.Fatal(err)
 		}
@@ -61,8 +61,8 @@ func InsertOne(data interface{}) *mongo.InsertOneResult {
 func DeleteOne(filter interface{}) (*mongo.DeleteResult, error) {
 	var deleteResult *mongo.DeleteResult
 	var err error
-	if db != nil {
-		collection := db.Collection("product")
+	if DB != nil {
+		collection := DB.Collection("product")
 		if deleteResult, err = collection.DeleteOne(context.Background(), filter); err != nil {
 			return nil, err
 		}
@@ -73,8 +73,8 @@ func DeleteOne(filter interface{}) (*mongo.DeleteResult, error) {
 func UpdateOne(filter interface{}, update interface{}) (*mongo.UpdateResult, error) {
 	var updateResult *mongo.UpdateResult
 	var err error
-	if db != nil {
-		collection := db.Collection("product")
+	if DB != nil {
+		collection := DB.Collection("product")
 		if updateResult, err = collection.UpdateOne(context.Background(), filter, update); err != nil {
 			return nil, err
 		}
@@ -85,8 +85,8 @@ func UpdateOne(filter interface{}, update interface{}) (*mongo.UpdateResult, err
 func GetAllProduct() (*mongo.Cursor, error) {
 	var cursor *mongo.Cursor
 	var err error
-	if db != nil {
-		collection := db.Collection("product")
+	if DB != nil {
+		collection := DB.Collection("product")
 		if cursor, err = collection.Find(context.Background(), bson.M{}); err != nil {
 			return nil, err
 		}
@@ -96,8 +96,8 @@ func GetAllProduct() (*mongo.Cursor, error) {
 
 func GetOneProduct(filter interface{}) *mongo.SingleResult {
 	var singleResult *mongo.SingleResult
-	if db != nil {
-		collection := db.Collection("product")
+	if DB != nil {
+		collection := DB.Collection("product")
 		singleResult = collection.FindOne(context.Background(), filter)
 	}
 	return singleResult

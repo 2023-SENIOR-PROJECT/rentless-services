@@ -92,6 +92,7 @@ func main() {
 	defer db.Close()
 	db.AutoMigrate(&Product{})
 
+	// mongo.ConnectMongoDB()
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
