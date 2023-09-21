@@ -18,11 +18,11 @@ message CreateProductRequest {
 }
 
 message ReadProductRequest {
-    uint32 id = 1;
+    string id = 1;
 }
 
 message UpdateProductRequest {
-    uint32 id = 1;
+    string id = 1;
     string name = 2;
     float price = 3;
     string description = 4;
@@ -30,7 +30,7 @@ message UpdateProductRequest {
 }
 
 message DeleteProductRequest {
-    uint32 id = 1;
+    string id = 1;
 }
 
 message DeleteProductResponse {
@@ -38,7 +38,7 @@ message DeleteProductResponse {
 }
 
 message Product {
-    uint32 id = 1;
+    string id = 1;
     string name = 2;
     float price = 3;
     string description = 4;

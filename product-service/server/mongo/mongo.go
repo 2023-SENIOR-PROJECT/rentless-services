@@ -1,8 +1,7 @@
-package mongo
+package database
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -14,6 +13,7 @@ import (
 )
 
 var DB *mongo.Database
+var Collection *mongo.Collection
 
 func init() {
 
@@ -24,26 +24,26 @@ func init() {
 	}
 }
 
-func ConnectMongoDB() {
+func ConnectMongoDB() (*mongo.Database, error) {
 	dbUrl := os.Getenv("DB_URL")
 	client, err := mongo.NewClient(options.Client().ApplyURI(dbUrl))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if err = client.Connect(context.Background()); err != nil {
-		log.Fatal(err)
+		return nil, err
 	} else {
 		if err = client.Ping(context.Background(), readpref.Primary()); err == nil {
+			DB = client.Database("rentless")
+			Collection = DB.Collection("product")
 			log.Println("Successfully connected to mongodb")
+			return DB, nil
 		} else {
-			log.Fatal(err)
+			return nil, err
 		}
 	}
 
-	DB = client.Database("rentless")
-	fmt.Println(DB.Name())
-	fmt.Println("Connected")
 }
 
 func InsertOne(data interface{}) *mongo.InsertOneResult {
