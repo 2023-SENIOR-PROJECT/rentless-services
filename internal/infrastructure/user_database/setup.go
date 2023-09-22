@@ -23,7 +23,7 @@ func ConnectDatabase() *UserDB {
 	port := "3306"
 	dbname := "rentless"
 
-	dsn := username + ":" + password + "@tcp(" + hostname + ":" + port + ")/" + dbname
+	dsn := username + ":" + password + "@tcp(" + hostname + ":" + port + ")/" + dbname + "?parseTime=true"
 	// dsn := fmt.Printf("%s:%s@tcp(%s:%s)/%s", username, password, hostname, port, dbname)
 	fmt.Println(dsn)
 
@@ -42,17 +42,9 @@ func ConnectDatabase() *UserDB {
 
 	fmt.Println("Successfully connected to MySQL database")
 
-	defer db.Close()
 	return &UserDB{
 		DB: db,
 	}
-}
-
-var db *sql.DB
-
-// GetDB returns the database connection
-func GetDB() *sql.DB {
-	return db
 }
 
 // Get One User done
@@ -104,7 +96,7 @@ func (userDB *UserDB) CreateUser(user models.User) (models.User, error) {
 
 	query = "SELECT id, firstname, lastname, age FROM users ORDER BY id DESC LIMIT 1"
 	var new_user models.User
-	err = userDB.DB.QueryRow(query).Scan(&user.ID, &new_user.Firstname, &new_user.Lastname, &new_user.Age)
+	err = userDB.DB.QueryRow(query).Scan(&new_user.ID, &new_user.Firstname, &new_user.Lastname, &new_user.Age)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -112,17 +104,17 @@ func (userDB *UserDB) CreateUser(user models.User) (models.User, error) {
 }
 
 // Update User done
-func (userDB *UserDB) UpdateUser(user models.User) (models.User, error) {
+func (userDB *UserDB) UpdateUser(id string, user models.User) (models.User, error) {
 	query := "UPDATE users SET firstname = ?, lastname = ?, age = ?, updated_at = NOW() WHERE id = ?"
 
-	_, err := userDB.DB.Exec(query, user.Firstname, user.Lastname, user.Age, user.ID)
+	_, err := userDB.DB.Exec(query, user.Firstname, user.Lastname, user.Age, id)
 	if err != nil {
 		return models.User{}, err
 	}
-
+	fmt.Println(id)
 	query = "SELECT id, firstname, lastname, age FROM users WHERE id = ?"
 	var new_user models.User
-	err = userDB.DB.QueryRow(query, user.ID).Scan(&new_user.ID, &new_user.Firstname, &new_user.Lastname, &new_user.Age)
+	err = userDB.DB.QueryRow(query, id).Scan(&new_user.ID, &new_user.Firstname, &new_user.Lastname, &new_user.Age)
 	if err != nil {
 		return models.User{}, err
 	}
@@ -140,19 +132,10 @@ func (userDB *UserDB) DeleteUser(id string) error {
 	return nil
 }
 
-// Is User Exist
-func (userDB *UserDB) userExists(id string) bool {
+// Is User Exist Rewrite
+func (userDB *UserDB) UserExists(id string) bool {
 	query := "SELECT id FROM users WHERE id = ?"
-	// var userID uint
-	// err := userDB.DB.QueryRow(query, id).Scan(&userID)
-	// return err != sql.ErrNoRows
-	var count int
-	fmt.Println("111111111")
-	err := userDB.DB.QueryRow(query, id).Scan(&count)
-	if err != nil {
-		fmt.Println("Scan Error")
-		return false
-	}
-	fmt.Println("22222222222")
-	return count > 0
+	var userID uint
+	err := userDB.DB.QueryRow(query, id).Scan(&userID)
+	return err != sql.ErrNoRows
 }

@@ -13,12 +13,6 @@ func main() {
 
 	userDB := user_database.ConnectDatabase()
 
-	// router.POST("/users", controllers.CreateUser)
-	// router.GET("/users", controllers.GetAllUser)
-	// router.GET("/users/:id", controllers.GetOneUser)
-	// router.PUT("/users/:id", controllers.UpdateUser)
-	// router.DELETE("/users/:id", controllers.DeleteUser)
-
 	router.POST("/users", func(c *gin.Context) {
 		controllers.CreateUser2(c, userDB)
 	})
@@ -35,6 +29,7 @@ func main() {
 		controllers.DeleteUser2(c, userDB)
 	})
 
+	defer userDB.DB.Close()
 	fmt.Println("running in localhost:8080")
 	router.Run("localhost:8080")
 }
