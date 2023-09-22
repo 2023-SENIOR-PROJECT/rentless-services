@@ -17,7 +17,7 @@ func ConnectDatabase() *UserDB {
 	// @TODO - Implement env variables
 
 	username := "root"
-	password := "Oakbymarwin2545"
+	password := "password"
 	// hostname := "rentless-product.chayaw1xzjuj.ap-southeast-1.rds.amazonaws.com"
 	hostname := "localhost"
 	port := "3306"
@@ -94,9 +94,9 @@ func (userDB *UserDB) CreateUser(user models.User) (models.User, error) {
 		return models.User{}, err
 	}
 
-	query = "SELECT id, firstname, lastname, age FROM users ORDER BY id DESC LIMIT 1"
+	query = "SELECT id, firstname, lastname, age, created_at, updated_at FROM users ORDER BY id DESC LIMIT 1"
 	var new_user models.User
-	err = userDB.DB.QueryRow(query).Scan(&new_user.ID, &new_user.Firstname, &new_user.Lastname, &new_user.Age)
+	err = userDB.DB.QueryRow(query).Scan(&new_user.ID, &new_user.Firstname, &new_user.Lastname, &new_user.Age, &new_user.CreatedAt, &new_user.UpdatedAt)
 	if err != nil {
 		return models.User{}, err
 	}
