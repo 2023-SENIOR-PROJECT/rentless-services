@@ -67,4 +67,18 @@ func main() {
 	} else {
 		log.Printf("DeleteProduct failed: Product not found")
 	}
+
+	// Call the GetAllProducts RPC to retrieve all products
+	getAllProductsRequest := &pb.GetAllProductsRequest{}
+	getAllProductsResponse, err := client.GetAllProducts(context.Background(), getAllProductsRequest)
+	if err != nil {
+		log.Fatalf("GetAllProducts failed: %v", err)
+	}
+
+	// Print the list of products
+	log.Println("List of all products:")
+	for _, product := range getAllProductsResponse.Products {
+		log.Printf("Product ID: %s, Name: %s, Price: %.2f, Description: %s, Owner: %s",
+			product.Id, product.Name, product.Price, product.Description, product.Owner)
+	}
 }
