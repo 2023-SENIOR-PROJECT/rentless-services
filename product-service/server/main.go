@@ -47,6 +47,31 @@ func (s *server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest
 	return productToProto(product), nil
 }
 
+func (s *server) GetAllProducts(ctx context.Context, req *pb.GetAllProductsRequest) (*pb.GetAllProductsResponse, error) {
+	cursor, err := s.coll.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("could not fetch products: %v", err)
+	}
+	defer cursor.Close(context.Background())
+
+	var products []*pb.Product
+	for cursor.Next(context.Background()) {
+		var product Product
+		if err := cursor.Decode(&product); err != nil {
+			return nil, fmt.Errorf("could not decode product: %v", err)
+		}
+		products = append(products, productToProto(&product))
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, fmt.Errorf("cursor error: %v", err)
+	}
+
+	return &pb.GetAllProductsResponse{
+		Products: products,
+	}, nil
+}
+
 func (s *server) ReadProduct(ctx context.Context, req *pb.ReadProductRequest) (*pb.Product, error) {
 	var product Product
 	res := s.coll.FindOne(context.Background(), bson.M{"_id": req.Id})

@@ -8,6 +8,7 @@ service ProductService {
     rpc ReadProduct (ReadProductRequest) returns (Product);
     rpc UpdateProduct (UpdateProductRequest) returns (Product);
     rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+    rpc GetAllProducts (GetAllProductsRequest) returns (GetAllProductsResponse); // Add this method
 }
 
 message CreateProductRequest {
@@ -43,4 +44,10 @@ message Product {
     float price = 3;
     string description = 4;
     string owner = 5;
+}
+
+message GetAllProductsRequest {}
+
+message GetAllProductsResponse {
+    repeated Product products = 1;
 }
