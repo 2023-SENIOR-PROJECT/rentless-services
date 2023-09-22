@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS users (
+	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	firstname VARCHAR(30) NOT NULL,
+	lastname VARCHAR(30) NOT NULL,
+	age INT(3) NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
+
+-- COPY PatientInfo FROM '/home/data/PatientInfo.csv' DELIMITER ',' CSV HEADER;
+-- COPY Datasource FROM '/home/data/datasource.csv' DELIMITER ',' CSV HEADER;
+-- COPY province FROM '/home/data/province.csv' DELIMITER ',' CSV HEADER;
