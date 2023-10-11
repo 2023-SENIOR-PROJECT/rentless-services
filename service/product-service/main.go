@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
-	pb "product-module/product"
-	database "product-module/server/mongo"
+	database "rentless-services/internal/infrastructure/product_database/mongo"
+	pb "rentless-services/service/product-service/product"
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go.mongodb.org/mongo-driver/bson"
