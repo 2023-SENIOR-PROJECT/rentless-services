@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package product;
+option go_package = "product-module/product";
+
+service ProductService {
+    rpc CreateProduct (CreateProductRequest) returns (Product);
+    rpc ReadProduct (ReadProductRequest) returns (Product);
+    rpc UpdateProduct (UpdateProductRequest) returns (Product);
+    rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+    rpc GetAllProducts (GetAllProductsRequest) returns (GetAllProductsResponse); // Add this method
+}
+
+message CreateProductRequest {
+    string name = 1;
+    float price = 2;
+    string description = 3;
+    string owner = 4;
+}
+
+message ReadProductRequest {
+    string id = 1;
+}
+
+message UpdateProductRequest {
+    string id = 1;
+    string name = 2;
+    float price = 3;
+    string description = 4;
+    string owner = 5;
+}
+
+message DeleteProductRequest {
+    string id = 1;
+}
+
+message DeleteProductResponse {
+    bool success = 1;
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    float price = 3;
+    string description = 4;
+    string owner = 5;
+}
+
+message GetAllProductsRequest {}
+
+message GetAllProductsResponse {
+    repeated Product products = 1;
+}
