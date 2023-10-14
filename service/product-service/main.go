@@ -27,8 +27,7 @@ type Product struct {
 	Price        float32 `bson:"price"`
 	CountInStock int32   `bson:"countInStock"`
 	Description  string  `bson:"description"`
-	Rating       float32 `bson:"rating"`
-	NumReviews   int32   `bson:"numReviews"`
+	Owner        string  `bson:"ownerId"`
 }
 
 type server struct {
@@ -46,8 +45,7 @@ func (s *server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest
 		Price:        req.Price,
 		CountInStock: req.CountInStock,
 		Description:  req.Description,
-		Rating:       req.Rating,
-		NumReviews:   req.NumReviews,
+		Owner:        req.Owner,
 	}
 	product.ID = primitive.NewObjectID().Hex()
 	_, err := s.coll.InsertOne(context.Background(), product)
@@ -107,8 +105,7 @@ func (s *server) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest
 	product.Price = req.Price
 	product.CountInStock = req.CountInStock
 	product.Description = req.Description
-	product.Rating = req.Rating
-	product.NumReviews = req.NumReviews
+	product.Owner = req.Owner
 
 	log.Println("Product has been updated")
 
@@ -121,8 +118,7 @@ func (s *server) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest
 		"price":        product.Price,
 		"countInStock": product.CountInStock,
 		"description":  product.Description,
-		"rating":       product.Rating,
-		"numReviews":   product.NumReviews,
+		"owner":        product.Owner,
 	}})
 	if err != nil {
 		return nil, fmt.Errorf("could not update product: %v", err)
@@ -147,16 +143,18 @@ func (s *server) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest
 
 func productToProto(product *Product) *pb.Product {
 	return &pb.Product{
-		Id:          product.ID,
-		Name:        product.Name,
-		Slug:        product.Slug,
-		Image:       product.Image,
-		Category:    product.Category,
-		Brand:       product.Brand,
-		Price:       product.Price,
-		Description: product.Description,
-		Rating:      product.Rating,
-		NumReviews:  product.NumReviews,
+		Id:           product.ID,
+		Name:         product.Name,
+		Slug:         product.Slug,
+		Image:        product.Image,
+		Category:     product.Category,
+		Brand:        product.Brand,
+		Price:        product.Price,
+		CountInStock: product.CountInStock,
+		Description:  product.Description,
+		Rating:       0,
+		NumReviews:   0,
+		Owner:        product.Owner,
 	}
 }
 

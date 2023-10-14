@@ -20,8 +20,7 @@ message CreateProductRequest {
     float price = 6;
     int32 countInStock = 7;
     string description = 8;
-    float rating = 9;
-    int32 numReviews = 10;
+    string owner = 9;
 }
 
 message ReadProductRequest {
@@ -38,8 +37,7 @@ message UpdateProductRequest {
     float price = 7;
     int32 countInStock = 8;
     string description = 9;
-    float rating = 10;
-    int32 numReviews = 11;
+    string owner = 10;
 }
 
 message DeleteProductRequest {
@@ -60,8 +58,9 @@ message Product {
     float price = 7;
     int32 countInStock = 8;
     string description = 9;
-    float rating = 10;
+    int32 rating = 10;
     int32 numReviews = 11;
+    string owner = 12;
 }
 
 message GetAllProductsRequest {}
