@@ -14,8 +14,8 @@ func main() {
 	r := gin.Default()
 	r.POST("/auth/register", register)
 	r.POST("/auth/login", login)
-	r.POST("/auth/logout", logout)
-	r.POST("/auth/validate", validateToken)
+	r.GET("/auth/logout", logout)
+	r.GET("/auth/validate", validateToken)
 	r.Run(":8082")
 }
 
