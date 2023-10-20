@@ -94,18 +94,18 @@ func logout(c *gin.Context) {
 func validateToken(c *gin.Context) {
 	tokenString, err := c.Cookie("token")
 	if err != nil {
-		c.JSON(400, gin.H{"message": "invalid token"})
+		c.JSON(401, gin.H{"message": "invalid token"})
 		return
 	}
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 	if err != nil {
-		c.JSON(400, gin.H{"message": "invalid token"})
+		c.JSON(401, gin.H{"message": "invalid token"})
 		return
 	}
 	if !token.Valid {
-		c.JSON(400, gin.H{"message": "invalid token"})
+		c.JSON(401, gin.H{"message": "invalid token"})
 		return
 	}
 	c.JSON(200, gin.H{"message": "success"})
