@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	// ConnectMongoDB()
 	database.ConnectMongoDB()
 	r := gin.Default()
 	r.POST("/auth/register", register)
