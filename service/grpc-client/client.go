@@ -7,14 +7,20 @@ import (
 
 	pb "rentless-services/service/product-service/product"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
 
-const serverAddress = "localhost:50051" // Replace with the actual server address
+const serverAddress = "localhost:50051"
 
 func main() {
 	r := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
+	r.Use(cors.New(config))
 
 	// Set up a connection to the gRPC server.
 	conn, err := grpc.Dial(serverAddress, grpc.WithInsecure())
