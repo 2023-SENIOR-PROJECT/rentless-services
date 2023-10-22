@@ -14,6 +14,21 @@ import (
 
 const serverAddress = "localhost:50051"
 
+type Product struct {
+	Id           string  `json:"id"`
+	Name         string  `json:"name"`
+	Slug         string  `json:"slug"`
+	Image        string  `json:"image"`
+	Category     string  `json:"category"`
+	Brand        string  `json:"brand"`
+	Price        float32 `json:"price"`
+	CountInStock int32   `json:"countInStock"`
+	Description  string  `json:"description"`
+	Rating       int32   `json:"rating"`
+	NumReviews   int32   `json:"numReviews"`
+	Owner        string  `json:"owner"`
+}
+
 func main() {
 	r := gin.Default()
 
@@ -48,6 +63,7 @@ func main() {
 		c.JSON(http.StatusCreated, createProductResponse)
 	})
 
+	// TODO: replace mock reviews with real reviews data
 	// Endpoint to get all products
 	r.GET("/api/products", func(c *gin.Context) {
 		getAllProductsResponse, err := getAllProducts(client)
@@ -55,10 +71,27 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-
-		c.JSON(http.StatusOK, getAllProductsResponse)
+		getAllProductsResponseWithReviews := make([]*Product, len(getAllProductsResponse.Products))
+		for i, product := range getAllProductsResponse.Products {
+			getAllProductsResponseWithReviews[i] = &Product{
+				Id:           product.Id,
+				Name:         product.Name,
+				Slug:         product.Slug,
+				Image:        product.Image,
+				Category:     product.Category,
+				Brand:        product.Brand,
+				Price:        product.Price,
+				CountInStock: product.CountInStock,
+				Description:  product.Description,
+				Rating:       0,
+				NumReviews:   0,
+				Owner:        product.Owner,
+			}
+		}
+		c.JSON(http.StatusOK, getAllProductsResponseWithReviews)
 	})
 
+	// TODO: replace mock reviews with real reviews data
 	// Endpoint to get a single product
 	r.GET("/api/products/:id", func(c *gin.Context) {
 		productID := c.Param("id")
@@ -67,8 +100,21 @@ func main() {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 			return
 		}
-
-		c.JSON(http.StatusOK, readProductResponse)
+		readProductResponseWithReviews := &Product{
+			Id:           readProductResponse.Id,
+			Name:         readProductResponse.Name,
+			Slug:         readProductResponse.Slug,
+			Image:        readProductResponse.Image,
+			Category:     readProductResponse.Category,
+			Brand:        readProductResponse.Brand,
+			Price:        readProductResponse.Price,
+			CountInStock: readProductResponse.CountInStock,
+			Description:  readProductResponse.Description,
+			Rating:       0,
+			NumReviews:   0,
+			Owner:        readProductResponse.Owner,
+		}
+		c.JSON(http.StatusOK, readProductResponseWithReviews)
 	})
 
 	// Endpoint to update a product
