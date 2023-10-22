@@ -10,3 +10,8 @@ type Review struct {
 	Rate      int8      `json:"rate"`
 	Comment   string    `json:"comment"`
 }
+
+type AvgAndCount struct {
+	AvgRate      float64 `json:"average_rate"`
+	NumberReview int     `json:"count_reviews"`
+}

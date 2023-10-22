@@ -13,6 +13,10 @@ func main() {
 	reviewDB := review_database.ConnectDatabase()
 	fmt.Println(reviewDB)
 
+	// Get one review by reviewID
+	router.GET("/review/:reviewID", func(c *gin.Context) {
+		controllers.GetOneReview(c, reviewDB)
+	})
 	//Get all reviews
 	router.GET("/reviews", func(c *gin.Context) {
 		controllers.GetAllReviews(c, reviewDB)
@@ -21,12 +25,8 @@ func main() {
 	router.GET("/reviews/:productID", func(c *gin.Context) {
 		controllers.GetAllReviewsByProductID(c, reviewDB)
 	})
-	// Get one review by reviewID
-	router.GET("/review/:reviewID", func(c *gin.Context) {
-		controllers.GetOneReview(c, reviewDB)
-	})
 	// Create review
-	router.POST("reviews/:productID", func(c *gin.Context) {
+	router.POST("/reviews/:productID", func(c *gin.Context) {
 		controllers.CreateReview(c, reviewDB)
 	})
 

@@ -53,17 +53,14 @@ func ConnectDatabase() *ReviewDB {
 }
 
 // Get One Record By Review ID
-func (reviewDB *ReviewDB) GetOneRecord(id string) ([]models.Review, error) {
+func (reviewDB *ReviewDB) GetOneRecord(review_id string) (*models.Review, error) {
 	query := "SELECT id, created_at, author_id, product_id, rate, comment FROM reviews WHERE id = ?"
 	var review models.Review
-	err := reviewDB.DB.QueryRow(query, id).Scan(&review.ID, &review.CreatedAt, &review.AuthorID, &review.ProductID, &review.Rate, &review.Comment)
+	err := reviewDB.DB.QueryRow(query, review_id).Scan(&review.ID, &review.CreatedAt, &review.AuthorID, &review.ProductID, &review.Rate, &review.Comment)
 	if err != nil {
 		return nil, err
 	}
-	var reviews []models.Review
-	reviews = append(reviews, review)
-	return reviews, nil
-
+	return &review, nil
 }
 
 // Get Records By Product ID
@@ -104,10 +101,40 @@ func (reviewDB *ReviewDB) GetAllRecords() ([]models.Review, error) {
 	return reviews, nil
 }
 
+// Get Average of rate and number of reviews by product_id
+func (reviewDB *ReviewDB) GetAvgRateAndCountByProductID(product_id string) (*models.AvgAndCount, error) {
+	query := "SELECT COALESCE(AVG(rate), 0) AS average_rate, COUNT(*) AS count_reviews FROM reviews WHERE product_id = ?"
+	var avgAndCount models.AvgAndCount
+	err := reviewDB.DB.QueryRow(query, product_id).Scan(&avgAndCount.AvgRate, &avgAndCount.NumberReview)
+	if err != nil {
+		return nil, err
+	}
+	return &avgAndCount, nil
+}
+
+// Get Average of rate and number of reviews
+func (reviewDB *ReviewDB) GetAvgRateAndCountAll() (*models.AvgAndCount, error) {
+	query := "SELECT COALESCE(AVG(rate), 0) AS average_rate, COUNT(*) AS count_reviews FROM reviews"
+	var avgAndCount models.AvgAndCount
+	err := reviewDB.DB.QueryRow(query).Scan(&avgAndCount.AvgRate, &avgAndCount.NumberReview)
+	if err != nil {
+		return nil, err
+	}
+	return &avgAndCount, nil
+}
+
+// Get reviews Exist
+func (reviewDB *ReviewDB) ReviewExists(id string) bool {
+	query := "SELECT id FROM reviews WHERE id = ?"
+	var userID uint
+	err := reviewDB.DB.QueryRow(query, id).Scan(&userID)
+	return err != sql.ErrNoRows
+}
+
 // Create Records
-func (reviewDB *ReviewDB) CreateRecord(review models.Review) error {
+func (reviewDB *ReviewDB) CreateRecord(author_id, product_id string, review models.Review) error {
 	query := "INSERT INTO reviews (created_at, author_id, product_id, rate, comment) VALUES (NOW(), ?, ?, ?, ?)"
-	_, err := reviewDB.DB.Exec(query, review.AuthorID, review.ProductID, review.Rate, review.Comment)
+	_, err := reviewDB.DB.Exec(query, author_id, product_id, review.Rate, review.Comment)
 	if err != nil {
 		return err
 	}
