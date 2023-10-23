@@ -5,8 +5,10 @@ import (
 	"net/http"
 	user_database "rentless-services/internal/infrastructure/user_database"
 	models "rentless-services/internal/infrastructure/user_database/models"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 // New Version
@@ -94,4 +96,136 @@ func DeleteUser2(c *gin.Context, db *user_database.UserDB) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
+}
+
+// auth service
+func Register(c *gin.Context, userDB *user_database.UserDB) {
+	var req models.RegisterRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "bad request",
+		})
+		return
+	}
+	if req.Password1 != req.Password2 {
+		c.JSON(400, gin.H{
+			"message": "passwords do not match",
+		})
+		return
+	}
+	userInfo := models.User{
+		Firstname: req.Firstname,
+		Lastname:  req.Lastname,
+		Age:       req.Age,
+	}
+	res, err := userDB.CreateUser(userInfo)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "bad request",
+			"error":   err.Error(),
+		})
+		return
+	}
+	fmt.Println(res)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email":   req.Email,
+		"user_id": res.ID,
+	})
+	tokenString, err := token.SignedString([]byte("secret"))
+	var user models.UserAuthSturct
+	user.Email = req.Email
+	user.Pwd = req.Password1
+	user.Token = tokenString
+	// database.DB.Collection("auth").InsertOne(context.Background(), user)
+
+	err = userDB.CreateNewUser(user, res.ID)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "bad request",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	registerResponse := models.LoginResponse{
+		Firstname: res.Firstname,
+		Email:     req.Email,
+		Token:     tokenString,
+		User_id:   res.ID,
+	}
+
+	c.JSON(200, gin.H{
+		"message": "success",
+		"data":    registerResponse,
+	})
+}
+
+func Login(c *gin.Context, userDB *user_database.UserDB) {
+	var req models.LoginRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "bad request",
+		})
+		return
+	}
+	var user models.UserAuthSturct
+
+	// err = database.DB.Collection("auth").FindOne(context.Background(), bson.M{"email": req.Email, "password": req.Pwd}).Decode(&user)
+	user, err = userDB.FindUserAccount(req)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "invalid credentials",
+			"error":   err.Error(),
+		})
+		return
+	}
+	
+	uidstr := strconv.FormatUint(uint64(user.User_id), 10)
+	fmt.Println(uidstr)
+	userInfo, err := userDB.GetOneUser(uidstr)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "invalid credentials",
+			"error":   err.Error(),
+		})
+		return
+	}
+	loginResponse := models.LoginResponse{
+		Firstname: userInfo.Firstname,
+		Email:     user.Email,
+		Token:     user.Token,
+		User_id:   user.User_id,
+	}
+
+	c.SetCookie("token", user.Token, 3600, "/", "localhost", false, true)
+	c.JSON(200, gin.H{"message": "success", "data": loginResponse})
+}
+
+func Logout(c *gin.Context) {
+	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	c.JSON(200, gin.H{"message": "success"})
+}
+
+func ValidateToken(c *gin.Context) {
+	tokenString, err := c.Cookie("token")
+	if err != nil {
+		c.JSON(401, gin.H{"message": "invalid token"})
+		return
+	}
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	if err != nil {
+		c.JSON(401, gin.H{"message": "invalid token"})
+		return
+	}
+	fmt.Println(token.Claims)
+	if !token.Valid {
+		c.JSON(401, gin.H{"message": "invalid token"})
+		return
+	}
+	c.JSON(200, gin.H{"message": "success", "data": token.Claims})
 }
