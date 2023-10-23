@@ -132,7 +132,7 @@ func (reviewDB *ReviewDB) ReviewExists(id string) bool {
 }
 
 // Create Records
-func (reviewDB *ReviewDB) CreateRecord(author_id, product_id string, review models.Review) error {
+func (reviewDB *ReviewDB) CreateRecord(author_id uint, product_id string, review models.Review) error {
 	query := "INSERT INTO reviews (created_at, author_id, product_id, rate, comment) VALUES (NOW(), ?, ?, ?, ?)"
 	_, err := reviewDB.DB.Exec(query, author_id, product_id, review.Rate, review.Comment)
 	if err != nil {
