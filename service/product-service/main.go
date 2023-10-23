@@ -18,11 +18,16 @@ import (
 // Define your Product struct
 type Product struct {
 	// gorm.Model
-	ID          string  `bson:"_id"`
-	Name        string  `bson:"name"`
-	Price       float32 `bson:"price"`
-	Description string  `bson:"description"`
-	Owner       string  `bson:"owner"`
+	ID           string  `bson:"_id"`
+	Name         string  `bson:"name"`
+	Slug         string  `bson:"slug"`
+	Image        string  `bson:"image"`
+	Category     string  `bson:"category"`
+	Brand        string  `bson:"brand"`
+	Price        float32 `bson:"price"`
+	CountInStock int32   `bson:"countInStock"`
+	Description  string  `bson:"description"`
+	Owner        string  `bson:"ownerId"`
 }
 
 type server struct {
@@ -32,10 +37,15 @@ type server struct {
 
 func (s *server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest) (*pb.Product, error) {
 	product := &Product{
-		Name:        req.Name,
-		Price:       req.Price,
-		Description: req.Description,
-		Owner:       req.Owner,
+		Name:         req.Name,
+		Slug:         req.Slug,
+		Image:        req.Image,
+		Category:     req.Category,
+		Brand:        req.Brand,
+		Price:        req.Price,
+		CountInStock: req.CountInStock,
+		Description:  req.Description,
+		Owner:        req.Owner,
 	}
 	product.ID = primitive.NewObjectID().Hex()
 	_, err := s.coll.InsertOne(context.Background(), product)
@@ -88,12 +98,28 @@ func (s *server) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest
 	s.coll.FindOne(context.Background(), bson.M{"_id": product.ID})
 
 	product.Name = req.Name
+	product.Slug = req.Slug
+	product.Image = req.Image
+	product.Category = req.Category
+	product.Brand = req.Brand
 	product.Price = req.Price
+	product.CountInStock = req.CountInStock
 	product.Description = req.Description
 	product.Owner = req.Owner
+
 	log.Println("Product has been updated")
 
-	_, err := s.coll.UpdateOne(context.Background(), bson.M{"_id": req.Id}, bson.M{"$set": bson.M{"name": product.Name, "price": product.Price, "description": product.Description, "owner": product.Owner}})
+	_, err := s.coll.UpdateOne(context.Background(), bson.M{"_id": req.Id}, bson.M{"$set": bson.M{
+		"name":         product.Name,
+		"slug":         product.Slug,
+		"image":        product.Image,
+		"category":     product.Category,
+		"brand":        product.Brand,
+		"price":        product.Price,
+		"countInStock": product.CountInStock,
+		"description":  product.Description,
+		"owner":        product.Owner,
+	}})
 	if err != nil {
 		return nil, fmt.Errorf("could not update product: %v", err)
 	}
@@ -117,23 +143,22 @@ func (s *server) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest
 
 func productToProto(product *Product) *pb.Product {
 	return &pb.Product{
-		Id:          product.ID,
-		Name:        product.Name,
-		Price:       product.Price,
-		Description: product.Description,
-		Owner:       product.Owner,
+		Id:           product.ID,
+		Name:         product.Name,
+		Slug:         product.Slug,
+		Image:        product.Image,
+		Category:     product.Category,
+		Brand:        product.Brand,
+		Price:        product.Price,
+		CountInStock: product.CountInStock,
+		Description:  product.Description,
+		Rating:       0,
+		NumReviews:   0,
+		Owner:        product.Owner,
 	}
 }
 
 func main() {
-	// Specify the SQLite connection string
-	// db, err := gorm.Open("sqlite3", "rentless.db")
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to database: %v", err)
-	// }
-	// defer db.Close()
-	// db.AutoMigrate(&Product{})
-
 	db, err := database.ConnectMongoDB()
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
