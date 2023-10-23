@@ -139,3 +139,24 @@ func (userDB *UserDB) UserExists(id string) bool {
 	err := userDB.DB.QueryRow(query, id).Scan(&userID)
 	return err != sql.ErrNoRows
 }
+
+// Auth service
+func (userDB *UserDB) CreateNewUser(user models.UserAuthSturct, user_id uint) error {
+
+	query := "INSERT INTO auths (email, pwd, token, user_id) VALUES (?, ?, ?, ?)"
+	_, err := userDB.DB.Exec(query, user.Email, user.Pwd, user.Token, user_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (userDB *UserDB) FindUserAccount(req models.LoginRequest) (models.UserAuthSturct, error) {
+	query := "SELECT email, pwd, token, user_id FROM auths WHERE email = ? AND pwd = ?"
+	var user models.UserAuthSturct
+	err := userDB.DB.QueryRow(query, req.Email, req.Pwd).Scan(&user.Email, &user.Pwd, &user.Token, &user.User_id)
+	if err != nil {
+		return models.UserAuthSturct{}, err
+	}
+	return user, nil
+}
