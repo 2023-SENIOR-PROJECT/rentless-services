@@ -5,6 +5,7 @@ import (
 	"net/http"
 	user_database "rentless-services/internal/infrastructure/user_database"
 	models "rentless-services/internal/infrastructure/user_database/models"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -147,8 +148,17 @@ func Register(c *gin.Context, userDB *user_database.UserDB) {
 		})
 		return
 	}
+
+	registerResponse := models.LoginResponse{
+		Firstname: res.Firstname,
+		Email:     req.Email,
+		Token:     tokenString,
+		User_id:   res.ID,
+	}
+
 	c.JSON(200, gin.H{
 		"message": "success",
+		"data":    registerResponse,
 	})
 }
 
@@ -162,6 +172,7 @@ func Login(c *gin.Context, userDB *user_database.UserDB) {
 		return
 	}
 	var user models.UserAuthSturct
+
 	// err = database.DB.Collection("auth").FindOne(context.Background(), bson.M{"email": req.Email, "password": req.Pwd}).Decode(&user)
 	user, err = userDB.FindUserAccount(req)
 	if err != nil {
@@ -171,8 +182,26 @@ func Login(c *gin.Context, userDB *user_database.UserDB) {
 		})
 		return
 	}
+	
+	uidstr := strconv.FormatUint(uint64(user.User_id), 10)
+	fmt.Println(uidstr)
+	userInfo, err := userDB.GetOneUser(uidstr)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "invalid credentials",
+			"error":   err.Error(),
+		})
+		return
+	}
+	loginResponse := models.LoginResponse{
+		Firstname: userInfo.Firstname,
+		Email:     user.Email,
+		Token:     user.Token,
+		User_id:   user.User_id,
+	}
+
 	c.SetCookie("token", user.Token, 3600, "/", "localhost", false, true)
-	c.JSON(200, gin.H{"message": "success", "data": user})
+	c.JSON(200, gin.H{"message": "success", "data": loginResponse})
 }
 
 func Logout(c *gin.Context) {

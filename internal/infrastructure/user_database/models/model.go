@@ -31,3 +31,10 @@ type UserAuthSturct struct {
 	Token   string `json:"token" bson:"token"`
 	User_id uint   `json:"user_id" bson:"user_id"`
 }
+
+type LoginResponse struct {
+	Firstname string `json:"firstname" bson:"firstname"`
+	Email     string `json:"email" bson:"email"`
+	Token     string `json:"token" bson:"token"`
+	User_id   uint   `json:"user_id" bson:"user_id"`
+}
