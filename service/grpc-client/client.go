@@ -83,8 +83,8 @@ func main() {
 				Price:        product.Price,
 				CountInStock: product.CountInStock,
 				Description:  product.Description,
-				Rating:       product.Rating,
-				NumReviews:   product.NumReviews,
+				Rating:       0,
+				NumReviews:   0,
 				Owner:        product.Owner,
 			}
 		}
@@ -110,8 +110,8 @@ func main() {
 			Price:        readProductResponse.Price,
 			CountInStock: readProductResponse.CountInStock,
 			Description:  readProductResponse.Description,
-			Rating:       readProductResponse.Rating,
-			NumReviews:   readProductResponse.NumReviews,
+			Rating:       0,
+			NumReviews:   0,
 			Owner:        readProductResponse.Owner,
 		}
 		c.JSON(http.StatusOK, readProductResponseWithReviews)
