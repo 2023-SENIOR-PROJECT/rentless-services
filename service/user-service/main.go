@@ -28,7 +28,14 @@ func main() {
 	router.DELETE("/users/:id", func(c *gin.Context) {
 		controllers.DeleteUser2(c, userDB)
 	})
-
+	router.POST("/auth/register", func(c *gin.Context) {
+		controllers.Register(c, userDB)
+	})
+	router.POST("/auth/login", func(c *gin.Context) {
+		controllers.Login(c, userDB)
+	})
+	router.GET("/auth/logout", controllers.Logout)
+	router.GET("/auth/validate", controllers.ValidateToken)
 	defer userDB.DB.Close()
 	fmt.Println("running in localhost:8080")
 	router.Run("localhost:8080")

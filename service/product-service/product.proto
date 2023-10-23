@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package product;
+option go_package = "product-module/product";
+
+service ProductService {
+    rpc CreateProduct (CreateProductRequest) returns (Product);
+    rpc ReadProduct (ReadProductRequest) returns (Product);
+    rpc UpdateProduct (UpdateProductRequest) returns (Product);
+    rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+    rpc GetAllProducts (GetAllProductsRequest) returns (GetAllProductsResponse);
+}
+
+message CreateProductRequest {
+    string name = 1;
+    string slug = 2;
+    string image = 3;
+    string category = 4;
+    string brand = 5;
+    float price = 6;
+    int32 countInStock = 7;
+    string description = 8;
+    string owner = 9;
+}
+
+message ReadProductRequest {
+    string id = 1;
+}
+
+message UpdateProductRequest {
+    string id = 1;
+    string name = 2;
+    string slug = 3;
+    string image = 4;
+    string category = 5;
+    string brand = 6;
+    float price = 7;
+    int32 countInStock = 8;
+    string description = 9;
+    string owner = 10;
+}
+
+message DeleteProductRequest {
+    string id = 1;
+}
+
+message DeleteProductResponse {
+    bool success = 1;
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string slug = 3;
+    string image = 4;
+    string category = 5;
+    string brand = 6;
+    float price = 7;
+    int32 countInStock = 8;
+    string description = 9;
+    int32 rating = 10;
+    int32 numReviews = 11;
+    string owner = 12;
+}
+
+message GetAllProductsRequest {}
+
+message GetAllProductsResponse {
+    repeated Product products = 1;
+}
