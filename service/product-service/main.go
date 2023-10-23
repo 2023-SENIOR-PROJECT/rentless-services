@@ -2,9 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"go/types"
+	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	database "rentless-services/internal/infrastructure/product_database/mongo"
 	pb "rentless-services/service/product-service/product"
 
@@ -54,7 +58,7 @@ func (s *server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest
 	}
 	// product.ID = res.InsertedID.(string)
 	log.Println("New product has been created")
-	return productToProto(product), nil
+	return productToProtoForCreate(product), nil
 }
 
 func (s *server) GetAllProducts(ctx context.Context, req *pb.GetAllProductsRequest) (*pb.GetAllProductsResponse, error) {
@@ -141,7 +145,7 @@ func (s *server) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest
 	return &pb.DeleteProductResponse{Success: true}, nil
 }
 
-func productToProto(product *Product) *pb.Product {
+func productToProtoForCreate(product *Product) *pb.Product {
 	return &pb.Product{
 		Id:           product.ID,
 		Name:         product.Name,
@@ -154,6 +158,45 @@ func productToProto(product *Product) *pb.Product {
 		Description:  product.Description,
 		Rating:       0,
 		NumReviews:   0,
+		Owner:        product.Owner,
+	}
+}
+
+func productToProto(product *Product) *pb.Product {
+	reviewResponse, err := http.Get("http://localhost:8080/reviews/" + product.ID)
+	if err != nil {
+		log.Fatalf("could not get review: %v", err)
+	}
+	defer reviewResponse.Body.Close()
+	body, err := ioutil.ReadAll(reviewResponse.Body)
+	if err != nil {
+		log.Fatalf("could not read review body: %v", err)
+	}
+
+	type ReviewBody struct {
+		avg_rating     int32
+		number_reviews int32
+		reviews        types.Slice
+	}
+
+	var reviewBody ReviewBody
+	err = json.Unmarshal(body, &reviewBody)
+	if err != nil {
+		log.Fatalf("could not unmarshal review body: %v", err)
+	}
+
+	return &pb.Product{
+		Id:           product.ID,
+		Name:         product.Name,
+		Slug:         product.Slug,
+		Image:        product.Image,
+		Category:     product.Category,
+		Brand:        product.Brand,
+		Price:        product.Price,
+		CountInStock: product.CountInStock,
+		Description:  product.Description,
+		Rating:       reviewBody.avg_rating,
+		NumReviews:   reviewBody.number_reviews,
 		Owner:        product.Owner,
 	}
 }
