@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	review_database "rentless-services/internal/infrastructure/review_database"
-	"strconv"
 
 	models "rentless-services/internal/infrastructure/review_database/models"
 
@@ -39,7 +38,7 @@ func failOnError(err error, msg string) {
 
 func validate(token string) (uint, error) {
 	// Create a new request for validation
-	validateRequest, err := http.NewRequest(http.MethodGet, "http://localhost:8081/auth/validate", nil)
+	validateRequest, err := http.NewRequest(http.MethodGet, "http://localhost:8080/auth/validate", nil)
 	if err != nil {
 		fmt.Println("Error creating validation request:", err)
 		return 0, err
@@ -138,9 +137,8 @@ func CreateReview(c *gin.Context, db *review_database.ReviewDB) {
 		return
 	}
 
-	productIDint, err := strconv.Atoi(productID)
 	review.AuthorID = authorID
-	review.ProductID = uint(productIDint)
+	review.ProductID = productID
 
 	conn, err := amqp.Dial(RabbitMQURL)
 	if err != nil {
