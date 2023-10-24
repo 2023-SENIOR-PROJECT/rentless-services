@@ -3,11 +3,10 @@ package review_database
 import (
 	"database/sql"
 	"fmt"
-
-	models "rentless-services/internal/infrastructure/review_database/models"
-
 	"log"
 	"os"
+
+	models "rentless-services/internal/infrastructure/review_database/models"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -131,7 +130,7 @@ func (reviewDB *ReviewDB) ReviewExists(id string) bool {
 }
 
 // Create Records
-func (reviewDB *ReviewDB) CreateRecord(author_id uint, product_id string, review models.Review) error {
+func (reviewDB *ReviewDB) CreateRecord(author_id, product_id uint, review models.Review) error {
 	query := "INSERT INTO reviews (created_at, author_id, product_id, rate, comment) VALUES (NOW(), ?, ?, ?, ?)"
 	_, err := reviewDB.DB.Exec(query, author_id, product_id, review.Rate, review.Comment)
 	if err != nil {
