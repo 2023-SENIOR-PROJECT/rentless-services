@@ -12,6 +12,34 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type CreateRentalRequest struct {
+	ItemsPrice      float64                `json:"itemsPrice"`
+	OrderItems      []OrderItem            `json:"orderItems"`
+	PaymentMethod   string                 `json:"paymentMethod"`
+	ShippingAddress map[string]interface{} `json:"shippingAddress"`
+	ShippingPrice   float64                `json:"shippingPrice"`
+	TaxPrice        float64                `json:"taxPrice"`
+	TotalPrice      float64                `json:"totalPrice"`
+}
+
+type OrderItem struct {
+	ID           string  `json:"_id"`
+	Name         string  `json:"name"`
+	CountInStock int     `json:"countInStock"`
+	Image        string  `json:"image"`
+	Price        float64 `json:"price"`
+	Quantity     int     `json:"quantity"`
+	Slug         string  `json:"slug"`
+}
+
+type Product struct {
+	ID        primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	OrderID   string             `json:"orderId" bson:"orderId"`
+	ProductID string             `json:"productId" bson:"productId"`
+	Quantity  int                `json:"quantity" bson:"quantity"`
+	Amount    float64            `json:"amount" bson:"amount"`
+}
+
 func main() {
 	r := gin.Default()
 	r.GET("/rentals", GetAllRentals)
@@ -33,14 +61,30 @@ func main() {
 
 // CreateRental creates a new rental
 func CreateRental(c *gin.Context) {
-	var product Product
-	if err := c.ShouldBindJSON(&product); err != nil {
+	var request CreateRentalRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result := database.InsertOne(product)
-	c.JSON(http.StatusCreated, result)
+	for _, orderItem := range request.OrderItems {
+		log.Printf("Order Item ID: %s, Name: %s, Quantity: %d, Price: %f\n",
+			orderItem.ID, orderItem.Name, orderItem.Quantity, orderItem.Price)
+		// Save to database
+		product := Product{
+			OrderID:   primitive.NewObjectID().Hex(),
+			ProductID: orderItem.ID,
+			Quantity:  orderItem.Quantity,
+			Amount:    orderItem.Price,
+		}
+		result := database.InsertOne(product)
+		if result == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save to database"})
+			return
+		}
+
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Rental created successfully"})
 }
 
 // GetAllRentals retrieves all rentals
@@ -140,7 +184,7 @@ func DeleteRental(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusNoContent, gin.H{"message": "Product deleted successfully"})
 }
 
 func parseObjectID(id string, c *gin.Context) (primitive.ObjectID, error) {
@@ -149,12 +193,4 @@ func parseObjectID(id string, c *gin.Context) (primitive.ObjectID, error) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 	return pr, err
-}
-
-type Product struct {
-	ID        primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	OrderID   string             `json:"orderId" bson:"orderId"`
-	ProductID string             `json:"productId" bson:"productId"`
-	Quantity  int                `json:"quantity" bson:"quantity"`
-	Amount    float64            `json:"amount" bson:"amount"`
 }
