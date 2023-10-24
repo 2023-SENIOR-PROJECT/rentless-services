@@ -4,9 +4,11 @@ import (
 	"log"
 	"net/http"
 	database "rentless-services/internal/infrastructure/rental_database/mongo"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,6 +42,13 @@ type Product struct {
 	Amount    float64            `json:"amount" bson:"amount"`
 }
 
+const (
+	RabbitMQURL  = "amqp://guest:guest@localhost:5672/"
+	QueueName    = "rental_queue"
+	ExchangeName = "rental_exchange"
+	RoutingKey   = "rental"
+)
+
 func main() {
 	r := gin.Default()
 	r.GET("/rentals", GetAllRentals)
@@ -59,7 +68,6 @@ func main() {
 	}
 }
 
-// CreateRental creates a new rental
 func CreateRental(c *gin.Context) {
 	var request CreateRentalRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -67,23 +75,47 @@ func CreateRental(c *gin.Context) {
 		return
 	}
 
+	// Create a connection to RabbitMQ
+	conn, err := amqp.Dial(RabbitMQURL)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to RabbitMQ"})
+		return
+	}
+	defer conn.Close()
+
+	// Create a channel
+	ch, err := conn.Channel()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open a channel"})
+		return
+	}
+	defer ch.Close()
+
+	// Declare a queue
+	_, err = ch.QueueDeclare(QueueName, true, false, false, false, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to declare a queue"})
+		return
+	}
+
+	// Publish each product as a message to RabbitMQ
 	for _, orderItem := range request.OrderItems {
-		log.Printf("Order Item ID: %s, Name: %s, Quantity: %d, Price: %f\n",
-			orderItem.ID, orderItem.Name, orderItem.Quantity, orderItem.Price)
-		// Save to database
-		product := Product{
-			OrderID:   primitive.NewObjectID().Hex(),
-			ProductID: orderItem.ID,
-			Quantity:  orderItem.Quantity,
-			Amount:    orderItem.Price,
-		}
-		result := database.InsertOne(product)
-		if result == nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save to database"})
+		// Create a JSON representation of the product
+		productJSON := []byte(`{"productId": "` + orderItem.ID + `", "quantity": ` +
+			strconv.Itoa(orderItem.Quantity) + `, "amount": ` +
+			strconv.FormatFloat(orderItem.Price, 'f', -1, 64) + `}`)
+
+		// Publish the product to RabbitMQ
+		err = ch.Publish(ExchangeName, RoutingKey, false, false, amqp.Publishing{
+			ContentType: "application/json",
+			Body:        productJSON,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to publish a message to RabbitMQ"})
 			return
 		}
-
 	}
+
 	c.JSON(http.StatusCreated, gin.H{"message": "Rental created successfully"})
 }
 
