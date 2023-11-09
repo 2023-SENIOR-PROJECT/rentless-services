@@ -1,9 +1,9 @@
 package main
 
 import (
+	"authservice/controllers"
+	"authservice/db"
 	"fmt"
-	user_database "rentless-services/internal/infrastructure/user_database"
-	controllers "rentless-services/internal/infrastructure/user_database/controllers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +28,7 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	userDB := user_database.ConnectDatabase()
+	userDB := db.ConnectDatabase()
 
 	router.POST("/users", func(c *gin.Context) {
 		controllers.CreateUser2(c, userDB)

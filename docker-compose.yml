@@ -9,10 +9,31 @@ services:
       - MYSQL_DATABASE=rentless
       - MYSQL_ROOT_PASSWORD=password
     ports:
-      - '3306:3306'
+      - '3307:3306'
     volumes:
       - db:/var/lib/mysql
       - ./db/script/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - rentless
+  auth:
+    build: ./service/auth-service
+    # working_dir: /go/src
+    ports:
+      - '8082:8082'
+    command: [ "ls" ]
+  # auth:
+  #   image: golang:1.21
+  #   working_dir: /go/src
+  #   ports:
+  #     - '8082:8082'
+  #   command: [ "ls" ]
+  #   volumes:
+  #     - ./service/auth-service:/go/src
+  #     # - ./go.mod:go/src/go.mod
+  #     # - ./go.sum:go/src
+
+networks:
+  rentless:
 volumes:
   db:
     driver: local

@@ -1,10 +1,10 @@
 package controllers
 
 import (
+	"authservice/db"
+	"authservice/models"
 	"fmt"
 	"net/http"
-	user_database "rentless-services/internal/infrastructure/user_database"
-	models "rentless-services/internal/infrastructure/user_database/models"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ import (
 
 // New Version
 // New Get One User API
-func GetOneUser2(c *gin.Context, db *user_database.UserDB) {
+func GetOneUser2(c *gin.Context, db *db.UserDB) {
 	id := c.Param("id")
 	if !db.UserExists(id) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -31,7 +31,7 @@ func GetOneUser2(c *gin.Context, db *user_database.UserDB) {
 }
 
 // New Get All User API
-func GetAllUser2(c *gin.Context, db *user_database.UserDB) {
+func GetAllUser2(c *gin.Context, db *db.UserDB) {
 	users, err := db.GetAllUsers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -46,7 +46,7 @@ func GetAllUser2(c *gin.Context, db *user_database.UserDB) {
 }
 
 // New Create User API Not done
-func CreateUser2(c *gin.Context, db *user_database.UserDB) {
+func CreateUser2(c *gin.Context, db *db.UserDB) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -61,7 +61,7 @@ func CreateUser2(c *gin.Context, db *user_database.UserDB) {
 }
 
 // New Update User Not done
-func UpdateUser2(c *gin.Context, db *user_database.UserDB) {
+func UpdateUser2(c *gin.Context, db *db.UserDB) {
 	id := c.Param("id")
 	var user models.User
 	fmt.Println("Before Context to JSON")
@@ -84,7 +84,7 @@ func UpdateUser2(c *gin.Context, db *user_database.UserDB) {
 }
 
 // New Delete User done
-func DeleteUser2(c *gin.Context, db *user_database.UserDB) {
+func DeleteUser2(c *gin.Context, db *db.UserDB) {
 	id := c.Param("id")
 	if !db.UserExists(id) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -99,7 +99,7 @@ func DeleteUser2(c *gin.Context, db *user_database.UserDB) {
 }
 
 // auth service
-func Register(c *gin.Context, userDB *user_database.UserDB) {
+func Register(c *gin.Context, userDB *db.UserDB) {
 	var req models.RegisterRequest
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -162,7 +162,7 @@ func Register(c *gin.Context, userDB *user_database.UserDB) {
 	})
 }
 
-func Login(c *gin.Context, userDB *user_database.UserDB) {
+func Login(c *gin.Context, userDB *db.UserDB) {
 	var req models.LoginRequest
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -182,7 +182,7 @@ func Login(c *gin.Context, userDB *user_database.UserDB) {
 		})
 		return
 	}
-	
+
 	uidstr := strconv.FormatUint(uint64(user.User_id), 10)
 	fmt.Println(uidstr)
 	userInfo, err := userDB.GetOneUser(uidstr)

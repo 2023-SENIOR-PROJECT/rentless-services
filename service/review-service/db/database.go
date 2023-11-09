@@ -1,10 +1,9 @@
-package review_database
+package db
 
 import (
 	"database/sql"
 	"fmt"
-
-	models "rentless-services/internal/infrastructure/review_database/models"
+	"review-consumer/models"
 
 	"log"
 	"os"
@@ -19,7 +18,7 @@ type ReviewDB struct {
 
 func init() {
 
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load(".env")
 
 	if err != nil {
 		log.Fatal("Error loading .env file")

@@ -4,8 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
-
-	pb "rentless-services/service/product-service/product"
+	pb "product-service/product"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"

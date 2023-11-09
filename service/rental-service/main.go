@@ -1,9 +1,10 @@
 package main
 
+// docker run --name some-rabbit -p 5672:5672 -p 8084:15672 -d rabbitmq:3-management
 import (
 	"log"
 	"net/http"
-	database "rentless-services/internal/infrastructure/rental_database/mongo"
+	"rental-service/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -59,14 +60,14 @@ func CORSMiddleware() gin.HandlerFunc {
 func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
-	
+
 	r.GET("/rentals", GetAllRentals)
 	r.GET("/rentals/:id", GetRental)
 	r.POST("/rentals", CreateRental)
 	r.PUT("/rentals/:id", UpdateRental)
 	r.DELETE("/rentals/:id", DeleteRental)
 
-	_, err := database.ConnectMongoDB()
+	_, err := db.ConnectMongoDB()
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
@@ -95,7 +96,7 @@ func CreateRental(c *gin.Context) {
 			Quantity:  orderItem.Quantity,
 			Amount:    orderItem.Price,
 		}
-		result := database.InsertOne(product)
+		result := db.InsertOne(product)
 		if result == nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save to database"})
 			return
@@ -107,7 +108,7 @@ func CreateRental(c *gin.Context) {
 
 // GetAllRentals retrieves all rentals
 func GetAllRentals(c *gin.Context) {
-	cursor, err := database.GetAllProduct()
+	cursor, err := db.GetAllProduct()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -132,7 +133,7 @@ func GetRental(c *gin.Context) {
 	}
 
 	filter := bson.M{"_id": pr}
-	singleResult := database.GetOneProduct(filter)
+	singleResult := db.GetOneProduct(filter)
 
 	if singleResult.Err() == mongo.ErrNoDocuments {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
@@ -168,7 +169,7 @@ func UpdateRental(c *gin.Context) {
 	filter := bson.M{"_id": pr}
 	update := bson.M{"$set": product}
 
-	result, err := database.UpdateOne(filter, update)
+	result, err := db.UpdateOne(filter, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -191,7 +192,7 @@ func DeleteRental(c *gin.Context) {
 	}
 
 	filter := bson.M{"_id": pr}
-	result, err := database.DeleteOne(filter)
+	result, err := db.DeleteOne(filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

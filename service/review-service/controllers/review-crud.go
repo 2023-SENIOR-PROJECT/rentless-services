@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	review_database "rentless-services/internal/infrastructure/review_database"
-
-	models "rentless-services/internal/infrastructure/review_database/models"
+	"review-consumer/db"
+	"review-consumer/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/streadway/amqp"
@@ -66,7 +65,7 @@ func validate(token string) (uint, error) {
 	return validateBody.Data.UserID, nil
 }
 
-func GetAllReviews(c *gin.Context, db *review_database.ReviewDB) {
+func GetAllReviews(c *gin.Context, db *db.ReviewDB) {
 	reviews, err := db.GetAllRecords()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -84,7 +83,7 @@ func GetAllReviews(c *gin.Context, db *review_database.ReviewDB) {
 	c.JSON(http.StatusOK, gin.H{"avg_rate": avgRateAndCount.AvgRate, "number_reviews": avgRateAndCount.NumberReview, "reviews": reviews})
 }
 
-func GetAllReviewsByProductID(c *gin.Context, db *review_database.ReviewDB) {
+func GetAllReviewsByProductID(c *gin.Context, db *db.ReviewDB) {
 	productID := c.Param("productID")
 	reviews, err := db.GetRecordsByProductID(productID)
 	if err != nil {
@@ -103,7 +102,7 @@ func GetAllReviewsByProductID(c *gin.Context, db *review_database.ReviewDB) {
 	c.JSON(http.StatusOK, gin.H{"avg_rate": avgRateAndCount.AvgRate, "number_reviews": avgRateAndCount.NumberReview, "reviews": reviews})
 }
 
-func GetOneReview(c *gin.Context, db *review_database.ReviewDB) {
+func GetOneReview(c *gin.Context, db *db.ReviewDB) {
 	reviewID := c.Param("reviewID")
 	if !db.ReviewExists(reviewID) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Review not found"})
@@ -117,7 +116,7 @@ func GetOneReview(c *gin.Context, db *review_database.ReviewDB) {
 	c.JSON(http.StatusOK, gin.H{"review": review})
 }
 
-func CreateReview(c *gin.Context, db *review_database.ReviewDB) {
+func CreateReview(c *gin.Context, db *db.ReviewDB) {
 	token, err := c.Cookie("token")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
