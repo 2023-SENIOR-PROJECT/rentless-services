@@ -8,6 +8,8 @@ import (
 	database "rentless-services/internal/infrastructure/product_database/mongo"
 	pb "rentless-services/service/product-service/product"
 
+	serviceDiscovery "rentless-services/service/service_discovery/etcd"
+
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -54,7 +56,7 @@ func (s *server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest
 	}
 	// product.ID = res.InsertedID.(string)
 	log.Println("New product has been created")
-	return productToProto(product), nil
+	return productToProtoForCreateProduct(product), nil
 }
 
 func (s *server) GetAllProducts(ctx context.Context, req *pb.GetAllProductsRequest) (*pb.GetAllProductsResponse, error) {
@@ -141,7 +143,53 @@ func (s *server) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest
 	return &pb.DeleteProductResponse{Success: true}, nil
 }
 
+func getRating(productID string) (int32, error) {
+	arr, err := serviceDiscovery.DiscoverServices(serviceDiscovery.Client, "review")
+	if err != nil {
+		log.Fatalf("Failed to discover services: %v", err)
+	}
+	log.Printf("Discovered service addresses: %v\n", arr)
+	return 4, nil
+}
+
+func getNumReviews(productID string) (int32, error) {
+	arr, err := serviceDiscovery.DiscoverServices(serviceDiscovery.Client, "review")
+	if err != nil {
+		log.Fatalf("Failed to discover services: %v", err)
+	}
+	log.Printf("Discovered service addresses: %v\n", arr)
+	return 4, nil
+}
+
 func productToProto(product *Product) *pb.Product {
+
+	// get value of rating and numReviews from review service using service discovery
+	rating, err := getRating(product.ID)
+	if err != nil {
+		log.Fatalf("Failed to get rating: %v", err)
+	}
+	numReviews, err := getNumReviews(product.ID)
+	if err != nil {
+		log.Fatalf("Failed to get numReviews: %v", err)
+	}
+
+	return &pb.Product{
+		Id:           product.ID,
+		Name:         product.Name,
+		Slug:         product.Slug,
+		Image:        product.Image,
+		Category:     product.Category,
+		Brand:        product.Brand,
+		Price:        product.Price,
+		CountInStock: product.CountInStock,
+		Description:  product.Description,
+		Rating:       rating,
+		NumReviews:   numReviews,
+		Owner:        product.Owner,
+	}
+}
+
+func productToProtoForCreateProduct(product *Product) *pb.Product {
 	return &pb.Product{
 		Id:           product.ID,
 		Name:         product.Name,
