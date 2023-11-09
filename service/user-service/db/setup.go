@@ -18,8 +18,8 @@ func ConnectDatabase() *UserDB {
 	username := "root"
 	password := "password"
 	// hostname := "rentless-product.chayaw1xzjuj.ap-southeast-1.rds.amazonaws.com"
-	hostname := "localhost"
-	port := "3307"
+	hostname := "rentless-db"
+	port := "3306"
 	dbname := "rentless"
 
 	dsn := username + ":" + password + "@tcp(" + hostname + ":" + port + ")/" + dbname + "?parseTime=true"

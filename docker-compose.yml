@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   db:
+    container_name: rentless-db
     image: mysql:8.0
     cap_add:
       - SYS_NICE
@@ -15,25 +16,75 @@ services:
       - ./db/script/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - rentless
-  auth:
-    build: ./service/auth-service
-    # working_dir: /go/src
+  some-rabbit:
+    # docker run --name some-rabbit -p 5672:5672 -p 8084:15672 -d rabbitmq:3-management
+    container_name: some-rabbit
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '8084:15672'
+  product-server:
+    build:
+      context: ./service/product-service
+      dockerfile: server.Dockerfile
+    restart: always
+    ports:
+      - '50051:50051'
+    networks:
+      - rentless
+  product-client:
+    build:
+      context: ./service/product-service
+      dockerfile: client.Dockerfile
+    restart: always
+    ports:
+      - '8081:8081'
+    networks:
+      - rentless
+  user-service:
+    build:
+      context: ./service/user-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '8080:8080'
+    networks:
+      - rentless
+    depends_on:
+      - db
+  review-con-service:
+    build:
+      context: ./service/review-service
+      dockerfile: review-con.Dockerfile
+    restart: always
+    networks:
+      - rentless
+    depends_on:
+      - db
+  review-pro-service:
+    build:
+      context: ./service/review-service
+      dockerfile: review-pro.Dockerfile
+    restart: always
     ports:
       - '8082:8082'
-    command: [ "ls" ]
-  # auth:
-  #   image: golang:1.21
-  #   working_dir: /go/src
-  #   ports:
-  #     - '8082:8082'
-  #   command: [ "ls" ]
-  #   volumes:
-  #     - ./service/auth-service:/go/src
-  #     # - ./go.mod:go/src/go.mod
-  #     # - ./go.sum:go/src
+    networks:
+      - rentless
+    depends_on:
+      - db
+  rental-service:
+    build:
+      context: ./service/rental-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '8083:8083'
+    networks:
+      - rentless
 
 networks:
   rentless:
+    driver: bridge
 volumes:
   db:
     driver: local
