@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	review_database "rentless-services/internal/infrastructure/review_database"
-	controllers "rentless-services/internal/infrastructure/review_database/controllers"
+	"review-consumer/controllers"
+	"review-consumer/db"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
-	reviewDB := review_database.ConnectDatabase()
+	reviewDB := db.ConnectDatabase()
 	fmt.Println(reviewDB)
 
 	// Get one review by reviewID

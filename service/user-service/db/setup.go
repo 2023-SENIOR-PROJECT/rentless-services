@@ -1,10 +1,9 @@
-package user_database
+package db
 
 import (
+	"authservice/models"
 	"database/sql"
 	"fmt"
-
-	models "rentless-services/internal/infrastructure/user_database/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -20,7 +19,7 @@ func ConnectDatabase() *UserDB {
 	password := "password"
 	// hostname := "rentless-product.chayaw1xzjuj.ap-southeast-1.rds.amazonaws.com"
 	hostname := "localhost"
-	port := "3306"
+	port := "3307"
 	dbname := "rentless"
 
 	dsn := username + ":" + password + "@tcp(" + hostname + ":" + port + ")/" + dbname + "?parseTime=true"

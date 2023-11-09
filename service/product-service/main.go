@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
-	database "rentless-services/internal/infrastructure/product_database/mongo"
-	pb "rentless-services/service/product-service/product"
+	"product-service/db"
+	pb "product-service/product"
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go.mongodb.org/mongo-driver/bson"
@@ -159,18 +159,18 @@ func productToProto(product *Product) *pb.Product {
 }
 
 func main() {
-	db, err := database.ConnectMongoDB()
+	mongo, err := db.ConnectMongoDB()
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer db.Client().Disconnect(context.Background())
+	defer mongo.Client().Disconnect(context.Background())
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	service := &server{coll: database.Collection}
+	service := &server{coll: db.Collection}
 	pb.RegisterProductServiceServer(s, service)
 
 	log.Println("Starting gRPC server on :50051...")

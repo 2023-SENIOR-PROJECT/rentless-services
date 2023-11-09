@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	models "rentless-services/internal/infrastructure/review_database/models"
-
-	review_database "rentless-services/internal/infrastructure/review_database"
+	"review-consumer/db"
+	"review-consumer/models"
 
 	"github.com/streadway/amqp"
 )
@@ -61,7 +60,7 @@ func main() {
 	forever := make(chan bool)
 
 	// Connect Database
-	reviewDB := review_database.ConnectDatabase()
+	reviewDB := db.ConnectDatabase()
 	fmt.Println(reviewDB)
 
 	go func() {
