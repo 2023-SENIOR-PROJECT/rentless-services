@@ -9,6 +9,8 @@ services:
     environment:
       - MYSQL_DATABASE=rentless
       - MYSQL_ROOT_PASSWORD=password
+    expose:
+      - "3306"
     ports:
       - "3307:3306"
     volumes:
@@ -21,6 +23,9 @@ services:
     # docker run --name some-rabbit -p 5672:5672 -p 8084:15672 -d rabbitmq:3-management
     container_name: some-rabbit
     image: rabbitmq:3-management
+    expose:
+      - "5672"
+      - "15672"
     ports:
       - "5672:5672"
       - "8084:15672"
@@ -30,6 +35,8 @@ services:
       context: ./service/product-service
       dockerfile: server.Dockerfile
     restart: always
+    expose:
+      - "50051"
     ports:
       - "50051:50051"
     networks:
@@ -40,6 +47,8 @@ services:
       context: ./service/product-service
       dockerfile: client.Dockerfile
     restart: always
+    expose:
+      - "8081"
     ports:
       - "8081:8081"
     networks:
@@ -50,6 +59,8 @@ services:
       context: ./service/user-service
       dockerfile: Dockerfile
     restart: always
+    expose:
+      - "8080"
     ports:
       - "8080:8080"
     networks:
@@ -72,6 +83,8 @@ services:
       context: ./service/review-service
       dockerfile: review-pro.Dockerfile
     restart: always
+    expose:
+      - "8082"
     ports:
       - "8082:8082"
     networks:
@@ -84,6 +97,8 @@ services:
       context: ./service/rental-service
       dockerfile: Dockerfile
     restart: always
+    expose:
+      - "8083"
     ports:
       - "8083:8083"
     networks:
