@@ -22,6 +22,7 @@ plugins:
     origins:
     - '*'
     preflight_continue: false
+    private_network: false
   enabled: true
   name: cors
   protocols:
@@ -32,7 +33,7 @@ plugins:
 services:
 - connect_timeout: 60000
   enabled: true
-  host: 192.168.1.27
+  host: product-client
   name: Product-Service
   path: /
   port: 8081
@@ -44,8 +45,7 @@ services:
     name: Product-Service-Routes
     path_handling: v1
     paths:
-    - /api/products
-    - /api/products/:Id
+    - /api/v1/product-service
     preserve_host: false
     protocols:
     - http
@@ -53,31 +53,59 @@ services:
     regex_priority: 0
     request_buffering: true
     response_buffering: true
-    strip_path: false
+    strip_path: true
   write_timeout: 60000
 - connect_timeout: 60000
   enabled: true
-  host: 192.168.1.27
+  host: rental-service
   name: Rental-Service
   path: /
   port: 8083
   protocol: http
   read_timeout: 60000
   retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    name: rental-route
+    path_handling: v1
+    paths:
+    - /api/v1/rental-service
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
   write_timeout: 60000
 - connect_timeout: 60000
   enabled: true
-  host: 192.168.1.27
+  host: review-pro-service
   name: Review-Service
   path: /
   port: 8082
   protocol: http
   read_timeout: 60000
   retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    name: review-route
+    path_handling: v1
+    paths:
+    - /api/v1/review-service
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
   write_timeout: 60000
 - connect_timeout: 60000
   enabled: true
-  host: 192.168.1.27
+  host: user-service
   name: User-Service
   path: /
   port: 8080
@@ -89,12 +117,7 @@ services:
     name: User-Auth-Service-Routes
     path_handling: v1
     paths:
-    - /users
-    - /users/:Id
-    - /auth/register
-    - /auth/login
-    - /auth/validate
-    - /auth/logout
+    - /api/v1/user-service
     preserve_host: false
     protocols:
     - http

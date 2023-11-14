@@ -44,6 +44,7 @@ services:
       - rentless
 
   product-client:
+    container_name: product-service
     build:
       context: ./service/product-service
       dockerfile: client.Dockerfile
