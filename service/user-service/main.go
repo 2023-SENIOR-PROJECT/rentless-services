@@ -54,6 +54,6 @@ func main() {
 	router.GET("/auth/logout", controllers.Logout)
 	router.GET("/auth/validate", controllers.ValidateToken)
 	defer userDB.DB.Close()
-	fmt.Println("running in localhost:8080")
-	router.Run("localhost:8080")
+	fmt.Println("running in port 8080")
+	router.Run(":8080")
 }

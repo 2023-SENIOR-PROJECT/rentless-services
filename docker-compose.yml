@@ -31,6 +31,7 @@ services:
       - "8084:15672"
 
   product-server:
+    container_name: product-server
     build:
       context: ./service/product-service
       dockerfile: server.Dockerfile
@@ -55,6 +56,7 @@ services:
       - rentless
 
   user-service:
+    container_name: user-service
     build:
       context: ./service/user-service
       dockerfile: Dockerfile

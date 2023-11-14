@@ -8,5 +8,5 @@ WORKDIR /go/src
 COPY . .
 # EXPOSE 8083
 # Build the Go app
-RUN go build -o main .
-CMD ["./main"]
+RUN go build -o consumer-build ./consumer/consumer.go
+CMD ["./consumer-build"]

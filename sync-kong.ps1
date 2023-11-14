@@ -1,0 +1,1 @@
+docker run -i --network=rentless-services_rentless -v ${PWD}:/deck kong/deck --kong-addr http://kong:8001 -s /deck/kong.yaml sync

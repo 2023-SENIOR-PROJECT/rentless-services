@@ -31,6 +31,6 @@ func main() {
 	})
 
 	defer reviewDB.DB.Close()
-	fmt.Println("running in localhost:8082")
-	router.Run("localhost:8082")
+	fmt.Println("running in port 8082")
+	router.Run(":8082")
 }

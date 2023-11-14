@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	RabbitMQURL  = "amqp://guest:guest@localhost:5672/"
+	RabbitMQURL  = "amqps://qntphlli:2dL5SE3y0b43BU_1xJHQtcCXO5BibvTz@armadillo.rmq.cloudamqp.com/qntphlli"
 	QueueName    = "review_queue"
 	ExchangeName = "review_exchange"
 	RoutingKey   = "review"

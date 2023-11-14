@@ -27,7 +27,6 @@ func init() {
 }
 
 func ConnectDatabase() *ReviewDB {
-	// dsn := "root:Oakbymarwin2545@tcp(localhost:3306)/rentless?parseTime=true"
 	dsn := os.Getenv("REVIEW_DB_URL")
 	fmt.Printf("URL: %s \n", dsn)
 

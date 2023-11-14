@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const serverAddress = "localhost:50051"
+const serverAddress = "product-server:50051"
 
 type Product struct {
 	Id           string  `json:"id"`

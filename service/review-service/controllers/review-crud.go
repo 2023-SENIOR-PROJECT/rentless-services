@@ -23,7 +23,7 @@ type Data struct {
 }
 
 const (
-	RabbitMQURL  = "amqp://guest:guest@localhost:5672/"
+	RabbitMQURL  = "amqps://qntphlli:2dL5SE3y0b43BU_1xJHQtcCXO5BibvTz@armadillo.rmq.cloudamqp.com/qntphlli"
 	QueueName    = "review_queue"
 	ExchangeName = "review_exchange"
 	RoutingKey   = "review"
@@ -37,7 +37,7 @@ func failOnError(err error, msg string) {
 
 func validate(token string) (uint, error) {
 	// Create a new request for validation
-	validateRequest, err := http.NewRequest(http.MethodGet, "http://localhost:8080/auth/validate", nil)
+	validateRequest, err := http.NewRequest(http.MethodGet, "http://user-service:8080/auth/validate", nil)
 	if err != nil {
 		fmt.Println("Error creating validation request:", err)
 		return 0, err

@@ -16,3 +16,5 @@ Empowering university students to find and provide cost-effective short-term ren
 - Product Service
 - Rental Service
 - Review Service
+
+### .env 
