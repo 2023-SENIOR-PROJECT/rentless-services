@@ -9,8 +9,8 @@ services:
     environment:
       - MYSQL_DATABASE=rentless
       - MYSQL_ROOT_PASSWORD=password
-    expose:
-      - "3306"
+    # expose:
+    #   - "3306"
     ports:
       - "3307:3306"
     volumes:
@@ -18,7 +18,24 @@ services:
       - ./db/script/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - rentless
-
+  db-review:
+    container_name: rentless-db-review
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      - MYSQL_DATABASE=rentless
+      - MYSQL_ROOT_PASSWORD=password
+    # expose:
+    #   - "3308"
+    ports:
+      - "3308:3306"
+    volumes:
+      - db-review:/var/lib/mysql
+      - ./db/script/init-review.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - rentless
   some-rabbit:
     # docker run --name some-rabbit -p 5672:5672 -p 8084:15672 -d rabbitmq:3-management
     container_name: some-rabbit
@@ -79,7 +96,7 @@ services:
     networks:
       - rentless
     depends_on:
-      - db
+      - db-review
 
   review-pro-service:
     build:
@@ -93,7 +110,7 @@ services:
     networks:
       - rentless
     depends_on:
-      - db
+      - db-review
 
   rental-service:
     build:
@@ -180,6 +197,8 @@ networks:
 
 volumes:
   db:
+    driver: local
+  db-review:
     driver: local
   pg_data:
     driver: local

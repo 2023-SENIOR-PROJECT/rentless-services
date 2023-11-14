@@ -13,14 +13,14 @@ CREATE TABLE IF NOT EXISTS auths (
     user_id INT(6) UNSIGNED NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-CREATE TABLE IF NOT EXISTS reviews (
-	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    author_id INT(6) NOT NULL,
-    product_id VARCHAR(255) NOT NULL,
-    rate TINYINT DEFAULT NULL,
-    comment VARCHAR(255) DEFAULT NULL
-);
+-- CREATE TABLE IF NOT EXISTS reviews (
+-- 	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+-- 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     author_id INT(6) NOT NULL,
+--     product_id VARCHAR(255) NOT NULL,
+--     rate TINYINT DEFAULT NULL,
+--     comment VARCHAR(255) DEFAULT NULL
+-- );
 
 -- COPY PatientInfo FROM '/home/data/PatientInfo.csv' DELIMITER ',' CSV HEADER;
 -- COPY Datasource FROM '/home/data/datasource.csv' DELIMITER ',' CSV HEADER;
