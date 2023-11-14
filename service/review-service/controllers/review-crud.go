@@ -45,6 +45,7 @@ func validate(token string) (uint, error) {
 
 	// Set the token in the request header
 	validateRequest.Header.Set("Cookie", "token="+token)
+	validateRequest.Header.Set("Authorization", "Bearer "+token)
 
 	// Send the validation request
 	validateResponse, err := http.DefaultClient.Do(validateRequest)
@@ -117,11 +118,9 @@ func GetOneReview(c *gin.Context, db *db.ReviewDB) {
 }
 
 func CreateReview(c *gin.Context, db *db.ReviewDB) {
-	token, err := c.Cookie("token")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	// token, err := c.Cookie("token")
+	tokenString := c.GetHeader("Authorization")
+	tokenString = tokenString[7:]
 	fmt.Println("TOKEN: ", token)
 	authorID, err := validate(token)
 	if err != nil {
