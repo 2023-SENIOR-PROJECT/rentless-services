@@ -214,10 +214,6 @@ func ValidateToken(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
 	tokenString = tokenString[7:]
 
-	if err != nil {
-		c.JSON(401, gin.H{"message": "invalid token"})
-		return
-	}
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})

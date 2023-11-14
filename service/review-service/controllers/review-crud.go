@@ -26,7 +26,6 @@ const (
 	RabbitMQURL  = "amqps://qntphlli:2dL5SE3y0b43BU_1xJHQtcCXO5BibvTz@armadillo.rmq.cloudamqp.com/qntphlli"
 	QueueName    = "review_queue"
 	ExchangeName = "review_exchange"
-	RoutingKey   = "review"
 )
 
 func failOnError(err error, msg string) {
@@ -34,6 +33,33 @@ func failOnError(err error, msg string) {
 		log.Fatalf("%s: %s", msg, err)
 	}
 }
+
+func GetConnection(url string) *amqp.Connection {
+	conn, err := amqp.Dial(url)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	return conn
+}
+
+func GetChannel(connection *amqp.Connection) *amqp.Channel {
+	ch, err := connection.Channel()
+	failOnError(err, "Failed to open a channel")
+	return ch
+}
+
+func Publish(message, rountingKey string, channel *amqp.Channel) {
+	err := channel.Publish(
+		"",          // exchange
+		rountingKey, // routing key
+		false,       // mandatory
+		false,       // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(message),
+		})
+	failOnError(err, "Failed to publish a message")
+}
+
+var CHANNEL = GetChannel(GetConnection(RabbitMQURL))
 
 func validate(token string) (uint, error) {
 	// Create a new request for validation
@@ -138,43 +164,16 @@ func CreateReview(c *gin.Context, db *db.ReviewDB) {
 	review.AuthorID = authorID
 	review.ProductID = productID
 
-	conn, err := amqp.Dial(RabbitMQURL)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "Failed to connect to RabbitMQ"})
-		return
-	}
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "Failed to open a channel"})
-		return
-	}
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		QueueName, // Queue name
-		false,     // Durable
-		false,     // Delete when unused
-		false,     // Exclusive
-		false,     // No-wait
-		nil,       // Arguments
-	)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	body, err := json.Marshal(review)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err = ch.Publish(
-		"",     // Exchange
-		q.Name, // Routing key
-		false,  // Mandatory
-		false,  // Immediate
+	err = CHANNEL.Publish(
+		"",        // Exchange
+		QueueName, // Routing key
+		false,     // Mandatory
+		false,     // Immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        body,
