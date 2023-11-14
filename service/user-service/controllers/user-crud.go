@@ -210,14 +210,9 @@ func Logout(c *gin.Context) {
 }
 
 func ValidateToken(c *gin.Context) {
-	// tokenString, err := c.Cookie("token")
 	tokenString := c.GetHeader("Authorization")
 	tokenString = tokenString[7:]
 
-	if err != nil {
-		c.JSON(401, gin.H{"message": "invalid token"})
-		return
-	}
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})

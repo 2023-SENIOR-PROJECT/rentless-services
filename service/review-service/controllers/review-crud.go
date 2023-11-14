@@ -121,8 +121,7 @@ func CreateReview(c *gin.Context, db *db.ReviewDB) {
 	// token, err := c.Cookie("token")
 	tokenString := c.GetHeader("Authorization")
 	tokenString = tokenString[7:]
-	fmt.Println("TOKEN: ", token)
-	authorID, err := validate(token)
+	authorID, err := validate(tokenString)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
