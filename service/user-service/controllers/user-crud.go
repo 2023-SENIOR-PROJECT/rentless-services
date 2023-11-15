@@ -211,6 +211,10 @@ func Logout(c *gin.Context) {
 
 func ValidateToken(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
+	if tokenString == "" {
+		c.JSON(401, gin.H{"message": "no token"})
+		return
+	}
 	tokenString = tokenString[7:]
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
