@@ -210,7 +210,6 @@ func Logout(c *gin.Context) {
 }
 
 func ValidateToken(c *gin.Context) {
-	// tokenString, err := c.Cookie("token")
 	tokenString := c.GetHeader("Authorization")
 	tokenString = tokenString[7:]
 
